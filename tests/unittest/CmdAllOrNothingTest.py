@@ -9,6 +9,7 @@
 
 
 import itertools
+import json
 import random
 import sys
 import unittest
@@ -257,6 +258,24 @@ class TestCmdAllOrNothingTest(unittest.TestCase):
 		self.assertNotEqual(res['output'].find('|CMD_STDERR|'), -1)
 		self.assertNotEqual(res['output'].find('Return Code: 0'), -1)
 
+	def test_serializable(self):
+		okCmd = Cmd.Cmd(cmd=[sys.executable, '-c', 'exit(0)'])
+		inst = CmdAllOrNothingTest(
+			testId='test_inst',
+			cmd=okCmd,
+			maxScore=123,
+		)
+		inst.Run()
+		res = inst.GetResult()
+		resJson = json.dumps(res)
+		resJsonDict = json.loads(resJson)
+		self.assertEqual(resJsonDict['score'], 123)
+		self.assertEqual(resJsonDict['max_score'], 123)
+		self.assertEqual(resJsonDict['status'], 'passed')
+		self.assertEqual(resJsonDict['name'], 'test_inst')
+		self.assertEqual(resJsonDict['name_format'], 'text')
+		self.assertEqual(resJsonDict['output_format'], 'md')
+		self.assertEqual(res, resJsonDict)
 
 class TestGrader(unittest.TestCase):
 
@@ -267,13 +286,12 @@ class TestGrader(unittest.TestCase):
 	def _run_some_tests(
 		self,
 		isFailedList: List[bool],
+		inst: Grader.Grader,
 	) -> None:
 		okCmd = Cmd.Cmd(cmd=[sys.executable, '-c', 'exit(0)'])
 		failCmd = Cmd.Cmd(cmd=[sys.executable, '-c', 'exit(1)'])
 
 		scoreList = [ random.randint(1, 1000) for _ in range(len(isFailedList))]
-
-		inst = Grader.Grader()
 
 		for isFailed, maxScore, i in zip(isFailedList, scoreList, range(len(isFailedList))):
 			inst.AddTest(
@@ -306,11 +324,25 @@ class TestGrader(unittest.TestCase):
 			# print(testRes)
 
 	def test_2_tests(self):
-		self._run_some_tests(isFailedList=[False, False])
-		self._run_some_tests(isFailedList=[False, True])
-		self._run_some_tests(isFailedList=[True, False])
-		self._run_some_tests(isFailedList=[True, True])
+		self._run_some_tests(isFailedList=[False, False], inst=Grader.Grader())
+		self._run_some_tests(isFailedList=[False, True], inst=Grader.Grader())
+		self._run_some_tests(isFailedList=[True, False], inst=Grader.Grader())
+		self._run_some_tests(isFailedList=[True, True], inst=Grader.Grader())
 
-	def test_10_tests(self):
+	def test_5_tests(self):
 		for failList in itertools.product([False,True], repeat=5):
-			self._run_some_tests(isFailedList=failList)
+			self._run_some_tests(isFailedList=failList, inst=Grader.Grader())
+
+	def test_serializable(self):
+		inst = Grader.Grader()
+		self._run_some_tests(isFailedList=[False, False], inst=inst)
+		res = inst.GetResults()
+
+		resJson = inst.GenResultsJson()
+		resJsonDict1 = json.loads(resJson)
+		self.assertEqual(resJsonDict1, res)
+
+		inst.WriteResultsJson(path='/tmp/test_serializable.json')
+		with open('/tmp/test_serializable.json', 'r') as f:
+			resJsonDict2 = json.load(f)
+		self.assertEqual(resJsonDict2, res)

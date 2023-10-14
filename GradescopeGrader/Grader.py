@@ -8,7 +8,10 @@
 ###
 
 
-from typing import List
+import json
+import os
+
+from typing import List, Union
 
 from . import Test
 
@@ -35,3 +38,13 @@ class Grader(object):
 		return {
 			'tests': resultFromTests
 		}
+
+	def GenResultsJson(self) -> str:
+		return json.dumps(self.GetResults(), indent='\t', sort_keys=True)
+
+	def WriteResultsJson(
+		self,
+		path: Union[str, os.PathLike] = '/autograder/results/results.json',
+	) -> None:
+		with open(path, 'w') as f:
+			f.write(self.GenResultsJson())
