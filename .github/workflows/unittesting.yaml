@@ -32,3 +32,8 @@ jobs:
       working-directory: ${{ github.workspace }}
       run: |
         python3 runtests.py
+
+    - name: Test setup.py
+      working-directory: ${{ github.workspace }}
+      run: |
+        python3 -m pip install .
