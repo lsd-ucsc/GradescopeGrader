@@ -10,7 +10,7 @@ on:
 
 jobs:
   unittest:
-    name: A job to run unit tests on github actions CI
+    name: Unit Testing
 
     strategy:
       matrix:
