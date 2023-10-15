@@ -9,11 +9,13 @@
 
 
 import json
+import logging
 import os
 
 from typing import List, Union
 
 from . import Test
+from . import _Meta
 
 
 class Grader(object):
@@ -22,6 +24,14 @@ class Grader(object):
 		super(Grader, self).__init__()
 
 		self.tests: List[Test.Test] = []
+
+		self.logger = logging.getLogger(
+			__name__ + '.' + self.__class__.__name__
+		)
+		self.logger.info('{} version {}'.format(
+			_Meta.PKG_NAME,
+			_Meta.__version__,
+		))
 
 	def AddTest(self, test: Test.Test) -> None:
 		self.tests.append(test)
