@@ -277,6 +277,42 @@ class TestCmdAllOrNothingTest(unittest.TestCase):
 		self.assertEqual(resJsonDict['output_format'], 'md')
 		self.assertEqual(res, resJsonDict)
 
+	def test_runtime_500ms(self):
+		okCmd = Cmd.Cmd(
+			cmd=[sys.executable, '-c', 'import time; time.sleep(0.5); exit(0)']
+		)
+		inst = CmdAllOrNothingTest(
+			testId='test_inst',
+			cmd=okCmd,
+			maxScore=123,
+		)
+		inst.Run()
+		self.assertGreaterEqual(inst.returncode, 0)
+		self.assertGreater(inst.GetRunTimeNS(), 400000000)
+		self.assertLess(   inst.GetRunTimeNS(), 600000000)
+		self.assertGreater(inst.GetRunTimeMS(), 400.0)
+		self.assertLess(   inst.GetRunTimeMS(), 600.0)
+		self.assertGreater(inst.GetRunTime(),   0.4)
+		self.assertLess(   inst.GetRunTime(),   0.6)
+
+	def test_runtime_2s(self):
+		okCmd = Cmd.Cmd(
+			cmd=[sys.executable, '-c', 'import time; time.sleep(2.0); exit(0)']
+		)
+		inst = CmdAllOrNothingTest(
+			testId='test_inst',
+			cmd=okCmd,
+			maxScore=123,
+		)
+		inst.Run()
+		self.assertGreaterEqual(inst.returncode, 0)
+		self.assertGreater(inst.GetRunTimeNS(), 1500000000)
+		self.assertLess(   inst.GetRunTimeNS(), 2500000000)
+		self.assertGreater(inst.GetRunTimeMS(), 1500.0)
+		self.assertLess(   inst.GetRunTimeMS(), 2500.0)
+		self.assertGreater(inst.GetRunTime(),   1.5)
+		self.assertLess(   inst.GetRunTime(),   2.5)
+
 class TestGrader(unittest.TestCase):
 
 	def test_constructor(self):
