@@ -35,6 +35,7 @@ class CmdAllOrNothingTest(Test.Test):
 		self.preCmd = preCmd
 		self.postCmd = postCmd
 
+		# failed score and status by default
 		self.score = 0
 		self.status = 'failed'
 
@@ -66,6 +67,7 @@ class CmdAllOrNothingTest(Test.Test):
 		self.runtimeNS  = self.cmd.runtimeNS
 
 		if self.cmd.returncode == 0:
+			# only update score and status when th return code is 0
 			self.score = self.maxScore
 			self.status = 'passed'
 
@@ -75,7 +77,7 @@ class CmdAllOrNothingTest(Test.Test):
 
 	def _GenOutput(self) -> Tuple[str, str]:
 		output = ''
-		output += 'Execution Time: {:.2f} ms\n'.format(self.runtimeNS / 1000000)
+		output += 'Execution Time: {:.2f} ms\n'.format(self.GetRunTimeMS())
 		output += 'Return Code: {}\n'.format(self.returncode)
 		output += '\n'
 
@@ -97,8 +99,11 @@ class CmdAllOrNothingTest(Test.Test):
 	def GetRunTimeNS(self) -> int:
 		return self.runtimeNS
 
+	def GetRunTimeMS(self) -> float:
+		return self.GetRunTimeNS() / 1000 / 1000
+
 	def GetRunTime(self) -> float:
-		return self.GetRunTimeNS() / 1000000
+		return self.GetRunTimeMS() / 1000
 
 	def GetResult(self) -> dict:
 		'''
