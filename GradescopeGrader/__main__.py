@@ -27,6 +27,10 @@ def main():
 		help='operation to perform',
 		required=True,
 	)
+	opParser.add_parser(
+		'version',
+		help='print version and exit',
+	)
 
 	args = argParser.parse_args()
 
@@ -35,6 +39,12 @@ def main():
 		level=logLvl,
 		format='%(asctime)s %(name)s[%(levelname)s]: %(message)s',
 	)
+
+	if args.operation == 'version':
+		from ._Meta import __version__
+		print(__version__)
+	else:
+		raise NotImplementedError('unknown operation {}'.format(args.operation))
 
 
 if __name__ == '__main__':
